@@ -1,3 +1,8 @@
+/*
+    this was based on an old tutorial originally in C from lodev.org
+    it could be better done by using a uint32 buffer which would allow texturing and a higher framerate
+*/
+
 $(function() {
     var screenWidth = 640;
     var screenHeight = 480;
@@ -55,7 +60,7 @@ $(function() {
     var dirX = -1.0;
     var dirY = 0.0; //initial direction vector
     var planeX = 0.0;
-    var planeY = 0.66; //the 2d raycaster version of camera plane
+    var planeY = 0.66; 
 
     var c = document.getElementById("myCanvas");
     var screen = c.getContext("2d");
@@ -71,31 +76,28 @@ $(function() {
         var oldTime = new Date();
         for (x = 0; x < screenWidth; x += 1) {
             //calculate ray position and direction
-            var cameraX = 2 * x / parseFloat(screenWidth) - 1; //x-coordinate in camera space
+            var cameraX = 2 * x / parseFloat(screenWidth) - 1; 
             var rayPosX = posX;
             var rayPosY = posY;
             var rayDirX = dirX + planeX * cameraX;
             var rayDirY = dirY + planeY * cameraX;
 
-            //which box of the map we're in
+            //which box of the map we are in
             var mapX = parseInt(rayPosX);
             var mapY = parseInt(rayPosY);
 
-            //length of ray from current position to next x or y-side
             var sideDistX;
             var sideDistY;
-
-            //length of ray from one x or y-side to next x or y-side
+            
             var deltaDistX = Math.sqrt(1 + (rayDirY * rayDirY) / (rayDirX * rayDirX));
             var deltaDistY = Math.sqrt(1 + (rayDirX * rayDirX) / (rayDirY * rayDirY));
             var perpWallDist;
 
-            //what direction to step in x or y-direction (either +1 or -1)
             var stepX;
             var stepY;
 
-            var hit = 0; //was there a wall hit?
-            var side; //was a NS or a EW wall hit?
+            var hit = 0; //has the ray hit a wall?
+            var side; //direction of the wall that was hit
 
             //calculate step and initial sideDist
             if (rayDirX < 0) {
@@ -112,9 +114,7 @@ $(function() {
                 stepY = 1;
                 sideDistY = (mapY + 1.0 - rayPosY) * deltaDistY;
             }
-            //perform DDA
             while (hit == 0) {
-                //jump to next map square, OR in x-direction, OR in y-direction
                 if (sideDistX < sideDistY) {
                     sideDistX += deltaDistX;
                     mapX += stepX;
@@ -124,18 +124,18 @@ $(function() {
                     mapY += stepY;
                     side = 1;
                 }
-                //Check if ray has hit a wall
+                //check if ray has hit a wall
                 if (worldMap[mapX][mapY] > 0) hit = 1;
             }
 
-            //Calculate distance of perpendicular ray (Euclidean distance will give fisheye effect!)
+            //calculate distance of perpendicular ray 
             if (side == 0) {
                 perpWallDist = (mapX - rayPosX + (1 - stepX) / 2) / rayDirX;
             } else {
                 perpWallDist = (mapY - rayPosY + (1 - stepY) / 2) / rayDirY;
             }
 
-            //Calculate height of line to draw on screen
+            //calculate height of line to draw on screen
             var lineHeight = parseInt(screenHeight / perpWallDist);
 
             //calculate lowest and highest pixel to fill in current stripe
@@ -168,11 +168,11 @@ $(function() {
 
         time = new Date();
 
-        var frameTime = (time.getTime() - oldTime.getTime()) / 1000.0; //frametime is the time this frame has taken, in seconds
+        var frameTime = (time.getTime() - oldTime.getTime()) / 1000.0; 
 
-        //speed modifiers
-        var moveSpeed = (frameTime + 0.01) * 60.0; //the constant value is in squares/second
-        var rotSpeed = (frameTime + 0.002) * 30.0; //the constant value is in radians/second
+        //speed modifiers, have to add a small number to the inital frametime in the case that we get a frametime of 0
+        var moveSpeed = (frameTime + 0.01) * 60.0; 
+        var rotSpeed = (frameTime + 0.002) * 30.0; 
 
         document.onkeydown = checkKey;
 
